@@ -26,16 +26,11 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
+		// clear console
+		fmt.Print("\033[H\033[2J")
+
+		fmt.Println("generating go struct")
 		startTime := time.Now()
-		var style = lipgloss.NewStyle().
-			Bold(true).
-			Foreground(lipgloss.Color("#d1d5db")).
-			Background(lipgloss.Color("#172554")).
-			PaddingTop(2).
-			PaddingBottom(2).
-			PaddingLeft(10).
-			PaddingRight(10).
-			AlignHorizontal(lipgloss.Center)
 
 		var errorStyle = lipgloss.NewStyle().
 			Bold(true).
@@ -55,25 +50,24 @@ to quickly create a Cobra application.`,
 		}
 		name, err := cmd.Flags().GetString("name")
 		if err != nil {
-			fmt.Println("Error getting name")
-			fmt.Print(err)
+			fmt.Println(errorStyle.Render("Error getting name"))
+			fmt.Println(errorStyle.Render(fmt.Sprintf("%s", err)))
 		}
 		output, err := cmd.Flags().GetString("output")
 		if err != nil {
-			fmt.Println("Error getting output")
-			fmt.Print(err)
+			fmt.Println(errorStyle.Render("Error getting output"))
+			fmt.Println(errorStyle.Render(fmt.Sprintf("%s", err)))
 
 		}
 		extension := strings.Split(filepath, ".")[len(strings.Split(filepath, "."))-1]
 
 		if extension != "yml" && extension != "json" {
-			fmt.Println("The file must be a yaml or json file")
+			fmt.Println(errorStyle.Render("Error: Invalid file \n The file must be a yaml or json file"))
 			return
 		}
 
-		fmt.Println(style.Render("Ⓢ ⓒ ⓗ ⓔ ⓜ Ⓣ ⓞ Ⓣ ⓨ ⓟ ⓔ ⓢ"))
-		message := "schemToTypes is generating the go struct for the schema file: " + filepath + "\n" + "The struct name will be: " + name + "\n" + "....."
-		fmt.Println(style.Render(message))
+		message := "*schemToTypes is generating the go struct for the schema file: " + filepath + ".* \n" + " >The struct name will be: " + name + "\n" + "....." + "\n"
+
 		data, err := file.Open(filepath)
 		if err != nil {
 			errorMessage := "Error opening file: " + filepath + "\n" + err.Error()
@@ -89,21 +83,20 @@ to quickly create a Cobra application.`,
 
 		if output == "c" {
 			parser.SendToClipboard(text)
-			fmt.Println(style.Render("Generated Go Struct: \n The struct has been copied to the clipboard"))
 			endTime := time.Now()
 
-			in := "# Generated Go Struct \n" + "```go \n" + text + "\n" + "Time taken: " + endTime.Sub(startTime).String() + "ms" + "```"
+			in := "# Ⓢ ⓒ ⓗ ⓔ ⓜ Ⓣ ⓞ Ⓣ ⓨ ⓟ ⓔ ⓢ\n" + message + " # Generated Go Struct \n" + "```go \n" + text + "\n" + "```" + "\n" + "---" + "\n Time taken: " + endTime.Sub(startTime).String() + "\n" + "- [x] Parse file \n" + "- [x] Generated struct\n" + "- [x] Copy to clipboard\n" + "### *** Paste the structs in your editor and Happy coding ***\n"
 
 			out, err := glamour.Render(in, "dark")
 			if err != nil {
 				fmt.Println("Error rendering markdown")
 				fmt.Print(err)
 			}
-
 			fmt.Print(out)
+			return
 		} else {
 			file.SaveGoFile("", name, text)
-
+			return
 		}
 	},
 }
