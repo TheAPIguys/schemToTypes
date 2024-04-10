@@ -8,6 +8,7 @@ import (
 	"schemToTypes/file"
 	"schemToTypes/parser"
 	"strings"
+	"time"
 
 	"github.com/charmbracelet/glamour"
 	"github.com/charmbracelet/lipgloss"
@@ -25,6 +26,7 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
+		startTime := time.Now()
 		var style = lipgloss.NewStyle().
 			Bold(true).
 			Foreground(lipgloss.Color("#d1d5db")).
@@ -88,13 +90,16 @@ to quickly create a Cobra application.`,
 		if output == "c" {
 			parser.SendToClipboard(text)
 			fmt.Println(style.Render("Generated Go Struct: \n The struct has been copied to the clipboard"))
-			in := "# Generated Go Struct \n" + "```go \n" + text + "\n```"
+			endTime := time.Now()
+
+			in := "# Generated Go Struct \n" + "```go \n" + text + "\n" + "Time taken: " + endTime.Sub(startTime).String() + "ms" + "```"
 
 			out, err := glamour.Render(in, "dark")
 			if err != nil {
 				fmt.Println("Error rendering markdown")
 				fmt.Print(err)
 			}
+
 			fmt.Print(out)
 		} else {
 			file.SaveGoFile("", name, text)
