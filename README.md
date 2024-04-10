@@ -9,4 +9,11 @@ SchemToTypes is a command-line interface (CLI) tool that converts API JSON/YAML 
 
 ## Installation
 
-To install SchemToTypes, you need to have Go and Node.js installed on your machine. Then, you can use the following commands:
+To install schemToTypes cli if you have golang in your system you can run the following command:
+
+```bash
+go install https://github.com/TheAPIguys/schemToTypes
+```
+
+
+  
