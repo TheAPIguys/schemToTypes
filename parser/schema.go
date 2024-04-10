@@ -192,14 +192,15 @@ func (j *JsonType) GetRef(exportType TypeOption) string {
 }
 
 func (j *JsonType) IsRequired() bool {
-	var required bool = false
+	var required bool = true
 
 	if j.Required != nil {
 		for _, value := range *j.Required {
 			if j.Key != nil && *j.Key == value {
-				required = true
+				return true
 			}
 		}
+		required = false
 	}
 	return required
 }
@@ -222,6 +223,7 @@ func (j *JsonType) GetType(exportType TypeOption) string {
 			return t + "bool"
 		case "array":
 			t = t + "[]"
+			j.Items.SetKey(*j.Key)
 			return t + j.Items.GetRef(exportType)
 		case "object":
 			if j.Key != nil {
@@ -263,6 +265,7 @@ func (j *JsonType) GenerateTypes(exportTypeOption TypeOption) string {
 				value.SetKey(key)
 				text += value.AddProperty(exportTypeOption) + "\n"
 				if value.Items != nil {
+					value.Items.SetKey(key)
 					(*j.Defs)[key] = *value.Items
 					recursiveAddDefs(j.Defs, value.Items)
 				}
@@ -345,5 +348,5 @@ func SendToClipboard(text string) {
 		log.Fatalf("error: %v", errClip)
 		return
 	}
-	fmt.Println("The struct has been generated successfully! and its saved in your clipboard. Paste it in your code editor.")
+
 }
