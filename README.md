@@ -15,5 +15,18 @@ To install schemToTypes cli if you have golang in your system you can run the fo
 go install https://github.com/TheAPIguys/schemToTypes
 ```
 
+## Usage
 
-  
+```bash
+schemToTypes go -f schema.json -n myTypes 
+```
+
+```bash
+schemToTypes ts -f schema.json -n myTypes 
+
+```
+
+```bash	
+schemToTypes help
+```
+
