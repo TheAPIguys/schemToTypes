@@ -1,0 +1,316 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "salesOrderResponse",
+  "type": "object",
+  "properties": {
+    "status": {
+      "type": "string"
+    },
+    "message": {},
+    "totalResult": {
+      "type": "number"
+    },
+    "salesOrders": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "invoiceDate": {
+            "type": "number"
+          },
+          "invoiceDateAsText": {
+            "type": "string"
+          },
+          "customerId": {
+            "type": "number"
+          },
+          "customerName": {
+            "type": "string"
+          },
+          "sendTo": {
+            "type": "object",
+            "properties": {
+              "id": {},
+              "primeName": {
+                "type": "string"
+              },
+              "givenName": {},
+              "phone": {
+                "type": "string"
+              },
+              "email": {},
+              "address": {
+                "type": "object",
+                "properties": {
+                  "street1": {
+                    "type": "string"
+                  },
+                  "street2": {
+                    "type": "string"
+                  },
+                  "city": {
+                    "type": "string"
+                  },
+                  "state": {
+                    "type": "string"
+                  },
+                  "postalCode": {
+                    "type": "string"
+                  },
+                  "country": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "street1",
+                  "street2"
+                ]
+              },
+              "isOrganization": {}
+            },
+            "required": [
+              "id",
+              "primeName",
+              "givenName",
+              "email",
+              "address",
+              "isOrganization"
+            ]
+          },
+          "salesType": {
+            "type": "string"
+          },
+          "salesPriceListId": {
+            "type": "number"
+          },
+          "salesPriceListName": {
+            "type": "string"
+          },
+          "priceDetails": {
+            "type": "object",
+            "properties": {
+              "countryCurrencyCode": {
+                "type": "string"
+              },
+              "taxPolicy": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "countryCurrencyCode",
+              "taxPolicy"
+            ]
+          },
+          "salesOrderStatus": {
+            "type": "string"
+          },
+          "salesOrderItems": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "number"
+                },
+                "itemId": {
+                  "type": "number"
+                },
+                "itemName": {
+                  "type": "string"
+                },
+                "unitPrice": {
+                  "type": "number"
+                },
+                "quantity": {
+                  "type": "number"
+                },
+                "unitOfMeasure": {
+                  "type": "string"
+                },
+                "discountPct": {
+                  "type": "number"
+                },
+                "adjustment": {
+                  "type": "number"
+                },
+                "taxAmount": {
+                  "type": "number"
+                },
+                "lineTotal": {
+                  "type": "number"
+                },
+                "accountId": {
+                  "type": "number"
+                },
+                "accountCode": {
+                  "type": "string"
+                },
+                "taxRateId": {
+                  "type": "number"
+                },
+                "taxRateName": {
+                  "type": "string"
+                },
+                "sku": {},
+                "externalReference": {}
+              },
+              "required": [
+                "id",
+                "itemId",
+                "itemName",
+                "unitPrice",
+                "quantity",
+                "unitOfMeasure",
+                "taxAmount",
+                "lineTotal",
+                "accountId",
+                "accountCode",
+                "taxRateId",
+                "taxRateName",
+                "sku",
+                "externalReference"
+              ]
+            }
+          },
+          "code": {
+            "type": "string"
+          },
+          "description": {},
+          "reference": {
+            "type": "string"
+          },
+          "orderDate": {
+            "type": "number"
+          },
+          "orderDateAsText": {
+            "type": "string"
+          },
+          "wineryId": {
+            "type": "number"
+          },
+          "wineryName": {
+            "type": "string"
+          },
+          "fulfillment": {
+            "type": "string"
+          },
+          "fulfillmentDate": {
+            "type": "number"
+          },
+          "fulfillmentDateAsText": {
+            "type": "string"
+          },
+          "salesRegionId": {
+            "type": "number"
+          },
+          "salesRegionCode": {
+            "type": "string"
+          },
+          "notes": {
+            "type": "string"
+          },
+          "customerPickup": {
+            "type": "boolean"
+          },
+          "disableAccountsSync": {
+            "type": "boolean"
+          },
+          "subTotal": {
+            "type": "number"
+          },
+          "taxBreakdown": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "amount": {
+                  "type": "number"
+                },
+                "ratePct": {
+                  "type": "number"
+                },
+                "inclusive": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "name",
+                "amount",
+                "ratePct",
+                "inclusive"
+              ]
+            }
+          },
+          "total": {
+            "type": "number"
+          },
+          "acctReference": {
+            "type": "string"
+          },
+          "posSaleReference": {
+            "type": "array",
+            "items": {}
+          },
+          "storageAreaId": {},
+          "storageAreaCode": {},
+          "externalTransactionId": {},
+          "ignoreStockError": {
+            "type": "boolean"
+          },
+          "posSaleDate": {},
+          "unlinkedItemsPresent": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "invoiceDateAsText",
+          "customerId",
+          "customerName",
+          "sendTo",
+          "salesType",
+          "salesPriceListId",
+          "salesPriceListName",
+          "priceDetails",
+          "salesOrderStatus",
+          "salesOrderItems",
+          "code",
+          "description",
+          "orderDate",
+          "orderDateAsText",
+          "wineryId",
+          "wineryName",
+          "fulfillment",
+          "fulfillmentDateAsText",
+          "salesRegionId",
+          "salesRegionCode",
+          "notes",
+          "customerPickup",
+          "disableAccountsSync",
+          "subTotal",
+          "taxBreakdown",
+          "total",
+          "posSaleReference",
+          "storageAreaId",
+          "storageAreaCode",
+          "externalTransactionId",
+          "ignoreStockError",
+          "posSaleDate",
+          "unlinkedItemsPresent"
+        ]
+      }
+    }
+  },
+  "required": [
+    "status",
+    "message",
+    "totalResult",
+    "salesOrders"
+  ]
+}
