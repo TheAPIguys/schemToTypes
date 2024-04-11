@@ -80,24 +80,21 @@ to quickly create a Cobra application.`,
 			fmt.Print(err)
 			return
 		}
-
+		endTime := time.Now()
+		in := "# Ⓢ ⓒ ⓗ ⓔ ⓜ Ⓣ ⓞ Ⓣ ⓨ ⓟ ⓔ ⓢ\n" + message + " # Generated Go Struct \n" + "```go \n" + text + "\n" + "```" + "\n" + "---" + "\n Time taken: " + endTime.Sub(startTime).String() + "⏰ \n" + "- [x] Parse file \n" + "- [x] Generated struct\n" + "- [x] Copy to clipboard\n"
 		if output == "c" {
 			parser.SendToClipboard(text)
-			endTime := time.Now()
-
-			in := "# Ⓢ ⓒ ⓗ ⓔ ⓜ Ⓣ ⓞ Ⓣ ⓨ ⓟ ⓔ ⓢ\n" + message + " # Generated Go Struct \n" + "```go \n" + text + "\n" + "```" + "\n" + "---" + "\n Time taken: " + endTime.Sub(startTime).String() + "\n" + "- [x] Parse file \n" + "- [x] Generated struct\n" + "- [x] Copy to clipboard\n" + "### *** Paste the structs in your editor and Happy coding ***\n"
-
-			out, err := glamour.Render(in, "dark")
-			if err != nil {
-				fmt.Println("Error rendering markdown")
-				fmt.Print(err)
-			}
-			fmt.Print(out)
-			return
+			in += "### *** Paste the structs in your editor and Happy coding ***\n"
 		} else {
-			file.SaveGoFile("", name, text)
-			return
+			file.SaveFile("", name, file.Go, text)
+			in += "### *** The struct has been saved to the current directory ***\n"
 		}
+		out, err := glamour.Render(in, "dark")
+		if err != nil {
+			fmt.Println("Error rendering markdown")
+			fmt.Print(err)
+		}
+		fmt.Print(out)
 	},
 }
 

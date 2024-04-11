@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/atotto/clipboard"
+	"github.com/gertd/go-pluralize"
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
 	"gopkg.in/yaml.v2"
@@ -32,6 +33,14 @@ func StringToTitle(s string) string {
 	// return capitalized key value example name -> Name
 	return cases.Title(language.Und, cases.NoLower).String(s)
 
+}
+
+// *
+// TurnPluralToSingle converts a plural string to a single string.
+// *
+func TurnPluralToSingle(s string) string {
+	pluralize := pluralize.NewClient()
+	return pluralize.Singular(s)
 }
 
 // *
@@ -74,7 +83,7 @@ func (y *YamlType) HasKey() bool {
 func (y *YamlType) GetRef(exportType TypeOption) string {
 	if y.Ref != nil {
 		var strArray = strings.Split(*y.Ref, "/")
-		return StringToTitle(strArray[len(strArray)-1])
+		return TurnPluralToSingle(StringToTitle(strArray[len(strArray)-1]))
 	}
 	return y.GetType(exportType)
 }
@@ -112,7 +121,21 @@ func (y *YamlType) GetType(exportType TypeOption) string {
 		}
 	case TypeScript:
 		// TO DO
-		return ""
+		switch y.Type {
+		case "string":
+			return "string"
+		case "integer":
+			return "number"
+		case "number":
+			return "number"
+		case "boolean":
+			return "boolean"
+		case "array":
+			return "Array<" + y.Items.GetRef(exportType) + ">"
+		default:
+			return "any"
+
+		}
 	}
 	return ""
 }
@@ -126,7 +149,11 @@ func (y *YamlType) AddProperty(exportType TypeOption) string {
 	case Golang:
 		text = fmt.Sprintf("\t %s \t %s \t `json:\"%s\"`", StringToTitle(k), y.GetType(exportType), StringToLower(*y.Key))
 	case TypeScript:
-		text = fmt.Sprintf("\t%s: \t %s", StringToTitle(*y.Key), y.GetType(exportType))
+		required := ""
+		if !y.IsRequired() {
+			required = "?"
+		}
+		text = fmt.Sprintf("\t%s%s: %s", StringToTitle(*y.Key), required, y.GetType(exportType))
 	}
 	return text
 
@@ -185,8 +212,11 @@ func (j *JsonType) HasKey() bool {
 }
 
 func (j *JsonType) GetRef(exportType TypeOption) string {
+	if j.Type != "object" {
+		return j.GetType(exportType)
+	}
 	if j.Key != nil {
-		return StringToTitle(*j.Key)
+		return TurnPluralToSingle(StringToTitle(*j.Key))
 	}
 	return j.GetType(exportType)
 }
@@ -223,7 +253,7 @@ func (j *JsonType) GetType(exportType TypeOption) string {
 			return t + "bool"
 		case "array":
 			t = t + "[]"
-			j.Items.SetKey(*j.Key)
+			j.Items.SetKey(TurnPluralToSingle(*j.Key))
 			return t + j.Items.GetRef(exportType)
 		case "object":
 			if j.Key != nil {
@@ -234,18 +264,43 @@ func (j *JsonType) GetType(exportType TypeOption) string {
 			return "interface{}"
 		}
 	case TypeScript:
-		// TO DO
-		return ""
+		switch j.Type {
+		case "string":
+			return "string"
+		case "integer":
+			return "number"
+		case "number":
+			return "number"
+		case "boolean":
+			return "boolean"
+		case "array":
+			j.Items.SetKey(TurnPluralToSingle(*j.Key))
+			return j.Items.GetRef(exportType) + "[]"
+		case "object":
+			if j.Key != nil {
+				return StringToTitle(*j.Key)
+			}
+			return "any"
+		default:
+			return "any"
+		}
 	}
 	return ""
 }
 func (j *JsonType) AddProperty(exportType TypeOption) string {
 	var text = ""
+	var k = *j.Key
+	if j.Key == nil {
+		k = "Key"
+	}
+	if j.Type == "object" || j.Defs != nil {
+		k = TurnPluralToSingle(StringToTitle(k))
+	}
 	switch exportType {
 	case Golang:
-		text = fmt.Sprintf("\t %s \t %s \t `json:\"%s\"`", StringToTitle(*j.Key), j.GetType(exportType), StringToLower(*j.Key))
+		text = fmt.Sprintf("\t %s \t %s \t `json:\"%s\"`", StringToTitle(k), j.GetType(exportType), StringToLower(*j.Key))
 	case TypeScript:
-		text = fmt.Sprintf("\t%s: \t %s", StringToTitle(*j.Key), j.GetType(exportType))
+		text = fmt.Sprintf("\t%s: %s", (k), j.GetType(exportType))
 	}
 	return text
 
@@ -263,11 +318,24 @@ func (j *JsonType) GenerateTypes(exportTypeOption TypeOption) string {
 		if j.Properties != nil {
 			for key, value := range *j.Properties {
 				value.SetKey(key)
+				if value.Required == nil {
+					value.Required = j.Required
+				}
 				text += value.AddProperty(exportTypeOption) + "\n"
+				if value.Type == "object" {
+					if _, ok := (*j.Defs)[key]; !ok {
+						(*j.Defs)[key] = value
+						recursiveAddDefs(j.Defs, &value)
+					}
+				}
 				if value.Items != nil {
-					value.Items.SetKey(key)
-					(*j.Defs)[key] = *value.Items
-					recursiveAddDefs(j.Defs, value.Items)
+					if value.Items.Type == "object" {
+						value.Items.SetKey(TurnPluralToSingle(key))
+						if _, ok := (*j.Defs)[TurnPluralToSingle(key)]; !ok {
+							(*j.Defs)[TurnPluralToSingle(key)] = *value.Items
+							recursiveAddDefs(j.Defs, value.Items)
+						}
+					}
 				}
 			}
 		}
@@ -282,13 +350,41 @@ func (j *JsonType) GenerateTypes(exportTypeOption TypeOption) string {
 	case TypeScript:
 		text = fmt.Sprintf("export type %s = {", StringToTitle(*j.Key))
 		text += "\n"
+		if j.Defs == nil {
+			j.Defs = &map[string]JsonType{}
+		}
 		if j.Properties != nil {
 			for key, value := range *j.Properties {
 				value.SetKey(key)
 				text += value.AddProperty(exportTypeOption) + "\n"
+				if value.Type == "object" {
+					if _, ok := (*j.Defs)[key]; !ok {
+						(*j.Defs)[key] = value
+						recursiveAddDefs(j.Defs, &value)
+					}
+
+				}
+				if value.Items != nil {
+					value.Items.SetKey(key)
+					if value.Items.Type == "object" {
+						if _, ok := (*j.Defs)[key]; !ok {
+							(*j.Defs)[key] = *value.Items
+							recursiveAddDefs(j.Defs, value.Items)
+						}
+					}
+				}
 			}
 		}
+
 		text += "}" + "\n"
+		if j.Defs != nil {
+			for key, value := range *j.Defs {
+				value.SetKey(key)
+				text += value.GenerateTypes(exportTypeOption)
+			}
+			text += "\n"
+		}
+
 	}
 
 	return text
@@ -303,8 +399,12 @@ func recursiveAddDefs(defs *map[string]JsonType, item *JsonType) {
 		for k, v := range *item.Properties {
 			v.SetKey(k)
 			if v.Type == "object" {
-				(*defs)[k] = v
-				recursiveAddDefs(defs, &v)
+				// check if defs already has the key
+				if _, ok := (*defs)[k]; !ok {
+
+					(*defs)[TurnPluralToSingle(k)] = v
+					recursiveAddDefs(defs, &v)
+				}
 			}
 		}
 	}
