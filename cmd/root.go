@@ -6,6 +6,7 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"schemToTypes/ui"
 
 	"github.com/spf13/cobra"
 )
@@ -29,6 +30,8 @@ to quickly create a Cobra application.`,
 			fmt.Println("args: ", args)
 		}
 		fmt.Print("Hello World")
+		ui.SelectOptions([]string{"Option 5", "Option 2"})
+
 	},
 }
 
