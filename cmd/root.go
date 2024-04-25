@@ -24,13 +24,9 @@ to quickly create a Cobra application.`,
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
 	Run: func(cmd *cobra.Command, args []string) {
-		file, _ := cmd.Flags().GetString("file")
-		fmt.Println("file: ", file)
-		if len(args) > 0 {
-			fmt.Println("args: ", args)
-		}
-		fmt.Print("Hello World")
-		ui.SelectOptions([]string{"Option 5", "Option 2"})
+
+		programLang, filename, output, name := ui.Form()
+		fmt.Println(programLang, filename, output, name)
 
 	},
 }
