@@ -33,5 +33,5 @@ schemToTypes help
 ```bash	
 schemToTypes 
 ```
-alone command is a guide to the usage of the tool
+alone command is a guided version to the usage of the tool
 ![alt text](image.png)
