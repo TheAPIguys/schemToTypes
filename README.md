@@ -30,3 +30,8 @@ schemToTypes ts -f schema.json -n myTypes
 schemToTypes help
 ```
 
+```bash	
+schemToTypes 
+```
+alone command is a guide to the usage of the tool
+![alt text](image.png)
