@@ -153,7 +153,7 @@ func (y *YamlType) AddProperty(exportType TypeOption) string {
 		if !y.IsRequired() {
 			required = "?"
 		}
-		text = fmt.Sprintf("\t%s%s: %s", StringToTitle(*y.Key), required, y.GetType(exportType))
+		text = fmt.Sprintf("\t%s%s: %s", (*y.Key), required, y.GetType(exportType))
 	}
 	return text
 
@@ -422,6 +422,10 @@ func ProcessRequest(requestData []byte, requestType string, exportType TypeOptio
 	// Parse the request data based on the request type
 	switch requestType {
 	case "yml":
+		var yamlSchema YamlType
+		err = yaml.Unmarshal(requestData, &yamlSchema)
+		schema = &yamlSchema
+	case "yaml":
 		var yamlSchema YamlType
 		err = yaml.Unmarshal(requestData, &yamlSchema)
 		schema = &yamlSchema

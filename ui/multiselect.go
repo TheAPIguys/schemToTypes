@@ -54,17 +54,20 @@ func Form() (programLang string, filename string, output string, name string) {
 
 			huh.NewSelect[string]().Options(listOfFiles...).Value(&filename).Title("Select a schema file"),
 			huh.NewInput().Title("Name of the main struct/type").Value(&name),
-			huh.NewConfirm().Affirmative("yes").Negative("no").Title("Do you want to output to a clipboard so you can ").Value(&b),
+			huh.NewConfirm().Affirmative("yes").Negative("no").Title("Do you want to send the structs to clipboard?").Description("In case no, you can output into a file").Value(&b),
 		),
 	)
 
 	if err := form.Run(); err != nil {
 		log.Fatal(err)
 	}
-	if !b {
+
+	if b {
 		output = "c"
 	} else {
-		form.Update(huh.NewInput().Title("Name of the output file").Value(&output))
+		form = huh.NewForm(huh.NewGroup(
+			(huh.NewInput().Title("Langague " + programLang + ", file: " + filename + ", struct Name: " + name + "\n" + "Name of the output file").Value(&output))).Title("Langague " + programLang + ", file: " + filename + ", struct Name: " + name))
+
 		if err := form.Run(); err != nil {
 			log.Fatal(err)
 		}

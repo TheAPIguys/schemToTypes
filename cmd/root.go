@@ -6,8 +6,14 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"schemToTypes/file"
+	"schemToTypes/parser"
 	"schemToTypes/ui"
+	"strings"
+	"time"
 
+	"github.com/charmbracelet/glamour"
+	"github.com/charmbracelet/lipgloss"
 	"github.com/spf13/cobra"
 )
 
@@ -26,8 +32,64 @@ to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
 
 		programLang, filename, output, name := ui.Form()
-		fmt.Println(programLang, filename, output, name)
 
+		fmt.Print("\033[H\033[2J")
+		var lang parser.TypeOption
+		if programLang == "Golang" {
+			lang = parser.Golang
+		} else {
+			lang = parser.TypeScript
+		}
+
+		fmt.Println("generating go struct")
+		startTime := time.Now()
+
+		var errorStyle = lipgloss.NewStyle().
+			Bold(true).
+			Foreground(lipgloss.Color("#d1d5db")).
+			Background(lipgloss.Color("#7f1d1d")).
+			BorderBackground(lipgloss.Color("d1d5db")).
+			PaddingTop(2).
+			PaddingBottom(2).
+			PaddingLeft(10).
+			PaddingRight(10).
+			AlignHorizontal(lipgloss.Center)
+
+		message := "*schemToTypes is generating the go struct for the schema file: " + filename + ".* \n" + " >The struct name will be: " + name + "\n" + "....." + "\n"
+
+		data, err := file.Open(filename)
+		if err != nil {
+			errorMessage := "Error opening file: " + filename + "\n" + err.Error()
+			fmt.Println(errorStyle.Render(errorMessage))
+			return
+		}
+		extension := strings.Split(filename, ".")[len(strings.Split(filename, "."))-1]
+
+		if extension != "yml" && extension != "json" && extension != "yaml" {
+			fmt.Println(errorStyle.Render("Error: Invalid file \n The file must be a yaml or json file"))
+			return
+		}
+		text, err := parser.ProcessRequest(data, extension, lang, name)
+		if err != nil {
+			fmt.Println("Error processing request")
+			fmt.Print(err)
+			return
+		}
+		endTime := time.Now()
+		in := "# Ⓢ ⓒ ⓗ ⓔ ⓜ Ⓣ ⓞ Ⓣ ⓨ ⓟ ⓔ ⓢ\n" + message + " # Generated Go Struct \n" + "```go \n" + text + "\n" + "```" + "\n" + "---" + "\n Time taken: " + endTime.Sub(startTime).String() + "⏰ \n" + "- [x] Parse file \n" + "- [x] Generated struct\n" + "- [x] Copy to clipboard\n"
+		if output == "c" {
+			parser.SendToClipboard(text)
+			in += "### *** Paste the structs in your editor and Happy coding ***\n"
+		} else {
+			file.SaveFile("", name, file.Go, text)
+			in += "### *** The struct has been saved to the current directory ***\n"
+		}
+		out, err := glamour.Render(in, "dark")
+		if err != nil {
+			fmt.Println("Error rendering markdown")
+			fmt.Print(err)
+		}
+		fmt.Print(out)
 	},
 }
 
